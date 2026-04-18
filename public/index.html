@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Lifetime Value Calculator — TMS Solutions Group</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #FAFAF7;
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #1a1a1a;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo-text {
+      font-family: 'Playfair Display', serif;
+      color: #B8860B;
+      font-size: 1.1rem;
+      letter-spacing: 0.5px;
+    }
+    .logo-sub {
+      color: #aaa;
+      font-size: 0.72rem;
+      margin-top: 2px;
+    }
+    .header-contact {
+      color: #aaa;
+      font-size: 0.75rem;
+      text-align: right;
+    }
+
+    /* ── LANDING ── */
+    .landing {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 40px;
+      text-align: center;
+    }
+    .pill {
+      display: inline-block;
+      background: #B8860B;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 99px;
+      margin-bottom: 24px;
+    }
+    .landing h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.6rem;
+      line-height: 1.2;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+    .benefits {
+      list-style: none;
+      margin: 0 auto 32px;
+      max-width: 480px;
+      text-align: left;
+    }
+    .benefits li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.97rem;
+      color: #444;
+    }
+    .benefits li::before {
+      content: '';
+      display: block;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      background: #B8860B;
+      border-radius: 50%;
+      margin-top: 2px;
+    }
+    .no-signup {
+      font-size: 0.82rem;
+      color: #888;
+      margin-top: 14px;
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+      max-width: 680px;
+      margin: 0 auto 48px;
+      padding: 40px 36px;
+    }
+    .form-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem;
+      margin-bottom: 28px;
+      color: #1a1a1a;
+    }
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #B8860B;
+      margin: 24px 0 12px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 6px;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 560px) { .field-row { grid-template-columns: 1fr; } }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .field label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .field .hint {
+      font-size: 0.74rem;
+      color: #888;
+      margin-top: 2px;
+    }
+    .field input {
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      background: #FAFAF7;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: #B8860B;
+    }
+    .optional-tag {
+      font-size: 0.7rem;
+      font-weight: 400;
+      color: #aaa;
+      margin-left: 4px;
+    }
+    .btn-calculate {
+      width: 100%;
+      background: #B8860B;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.15s;
+    }
+    .btn-calculate:hover { background: #9a6e09; }
+
+    /* ── RESULTS ── */
+    #results { display: none; max-width: 760px; margin: 0 auto 60px; padding: 0 16px; }
+
+    .ratio-banner {
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .ratio-banner.green  { background: #eafaf1; border: 2px solid #27AE60; }
+    .ratio-banner.yellow { background: #fef9ec; border: 2px solid #E67E22; }
+    .ratio-banner.red    { background: #fdf0ef; border: 2px solid #C0392B; }
+    .banner-icon {
+      font-size: 2.4rem;
+      min-width: 48px;
+      text-align: center;
+    }
+    .banner-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .banner-label.green  { color: #27AE60; }
+    .banner-label.yellow { color: #E67E22; }
+    .banner-label.red    { color: #C0392B; }
+    .banner-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: #1a1a1a;
+    }
+    .banner-desc { font-size: 0.88rem; color: #555; margin-top: 6px; }
+
+    /* 3 metric boxes */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 560px) { .metrics-row { grid-template-columns: 1fr; } }
+    .metric-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 18px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    }
+    .metric-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      color: #B8860B;
+      margin-bottom: 6px;
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* summary grid */
+    .summary-grid {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      margin-bottom: 28px;
+    }
+    .summary-grid h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 0.9rem;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .s-label { color: #555; }
+    .summary-row .s-value { font-weight: 600; color: #1a1a1a; }
+
+    /* levers table */
+    .levers-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      margin-bottom: 28px;
+      overflow-x: auto;
+    }
+    .levers-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+    }
+    .levers-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .levers-table th {
+      background: #f5f3ee;
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #555;
+    }
+    .levers-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f0f0f0;
+      vertical-align: top;
+    }
+    .levers-table tr:last-child td { border-bottom: none; }
+    .lever-name { font-weight: 600; color: #1a1a1a; }
+    .lever-desc { font-size: 0.8rem; color: #777; margin-top: 3px; }
+    .lever-impact { font-weight: 700; color: #B8860B; font-size: 1rem; }
+    .best-lever { background: #fffbf0; }
+    .best-badge {
+      display: inline-block;
+      background: #B8860B;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* recs */
+    .recs-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      margin-bottom: 28px;
+    }
+    .recs-section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+    }
+    .rec-card {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f0f0;
+      align-items: flex-start;
+    }
+    .rec-card:last-child { border-bottom: none; }
+    .rec-num {
+      background: #B8860B;
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      min-width: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+    .rec-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 4px; }
+    .rec-body { font-size: 0.85rem; color: #555; line-height: 1.5; }
+
+    /* bain stat */
+    .bain-stat {
+      background: #1a1a1a;
+      color: #fff;
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .bain-icon { font-size: 1.8rem; min-width: 36px; }
+    .bain-text { font-size: 0.9rem; line-height: 1.5; }
+    .bain-text strong { color: #B8860B; }
+
+    /* PDF btn */
+    .pdf-row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-pdf {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-pdf:hover { background: #333; }
+    .btn-recalc {
+      background: transparent;
+      color: #B8860B;
+      border: 2px solid #B8860B;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #1a1a1a;
+      color: #888;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+    }
+    footer a { color: #B8860B; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-text">TMS Solutions Group</div>
+    <div class="logo-sub">Business Growth Consulting</div>
+  </div>
+  <div class="header-contact">tom@tms-solutions-group.com &nbsp;|&nbsp; 386-387-8620</div>
+</header>
+
+<!-- LANDING -->
+<div class="landing" id="landing-section">
+  <div class="pill">Free Calculator</div>
+  <h1>Customer Lifetime<br>Value Calculator</h1>
+  <ul class="benefits">
+    <li>Discover exactly what each customer is worth to your business over their lifetime</li>
+    <li>Identify which of 3 growth levers — retention, frequency, or transaction size — moves your numbers most</li>
+    <li>Get your LTV:CAC ratio and see how your marketing spend stacks up against industry benchmarks</li>
+  </ul>
+</div>
+
+<!-- FORM -->
+<div class="form-card" id="form-section">
+  <h2>Enter Your Business Numbers</h2>
+
+  <div class="section-label">Business Info</div>
+  <div class="field">
+    <label>Business Name <span class="optional-tag">(optional)</span></label>
+    <input type="text" id="businessName" placeholder="e.g. Acme Plumbing Co." />
+  </div>
+
+  <div class="section-label">Customer Metrics</div>
+  <div class="field-row">
+    <div class="field">
+      <label>Average Transaction Value</label>
+      <input type="number" id="avgTransaction" placeholder="e.g. 250" min="0" step="any" />
+      <span class="hint">Dollar amount of a typical sale</span>
+    </div>
+    <div class="field">
+      <label>Purchases Per Customer Per Year</label>
+      <input type="number" id="frequency" placeholder="e.g. 4" min="0" step="any" />
+      <span class="hint">How often one customer buys annually</span>
+    </div>
+  </div>
+  <div class="field-row">
+    <div class="field">
+      <label>Average Customer Lifespan (years)</label>
+      <input type="number" id="lifespan" placeholder="e.g. 3" min="0" step="any" />
+      <span class="hint">How many years a customer stays</span>
+    </div>
+    <div class="field">
+      <label>Total Active Customers</label>
+      <input type="number" id="totalCustomers" placeholder="e.g. 500" min="0" step="any" />
+      <span class="hint">Your current customer count</span>
+    </div>
+  </div>
+
+  <div class="section-label">Profitability & Marketing</div>
+  <div class="field-row">
+    <div class="field">
+      <label>Profit Margin %</label>
+      <input type="number" id="profitMargin" placeholder="30" value="30" min="0" max="100" step="any" />
+      <span class="hint">Default 30% — adjust to your business</span>
+    </div>
+    <div class="field">
+      <label>Monthly Marketing Spend</label>
+      <input type="number" id="marketingSpend" placeholder="e.g. 2000" min="0" step="any" />
+      <span class="hint">Total monthly spend to attract customers</span>
+    </div>
+  </div>
+  <div class="field">
+    <label>New Customers Per Month</label>
+    <input type="number" id="newCustomers" placeholder="e.g. 20" min="0" step="any" />
+    <span class="hint">Average new customers acquired each month</span>
+  </div>
+
+  <button class="btn-calculate" onclick="calculate()">Calculate My Customer Lifetime Value</button>
+  <p class="no-signup">No sign-up required. Results shown instantly.</p>
+</div>
+
+<!-- RESULTS -->
+<div id="results">
+  <div class="ratio-banner" id="ratioBanner">
+    <div class="banner-icon" id="bannerIcon"></div>
+    <div>
+      <div class="banner-label" id="bannerLabel"></div>
+      <div class="banner-title" id="bannerTitle"></div>
+      <div class="banner-desc" id="bannerDesc"></div>
+    </div>
+  </div>
+
+  <div class="metrics-row">
+    <div class="metric-box">
+      <div class="metric-value" id="mCLV"></div>
+      <div class="metric-label">Customer Lifetime Value</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-value" id="mTotalBase"></div>
+      <div class="metric-label">Total Customer Base Value</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-value" id="mRatio"></div>
+      <div class="metric-label">LTV : CAC Ratio</div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <h3>Full Business Snapshot</h3>
+    <div class="summary-row"><span class="s-label">Customer Lifetime Value (CLV)</span><span class="s-value" id="sCLV"></span></div>
+    <div class="summary-row"><span class="s-label">Total Customer Base Value</span><span class="s-value" id="sTotalBase"></span></div>
+    <div class="summary-row"><span class="s-label">Profit Per Customer Lifetime</span><span class="s-value" id="sProfitPerCustomer"></span></div>
+    <div class="summary-row"><span class="s-label">Cost to Acquire One Customer (CAC)</span><span class="s-value" id="sCAC"></span></div>
+    <div class="summary-row"><span class="s-label">LTV : CAC Ratio</span><span class="s-value" id="sRatio"></span></div>
+  </div>
+
+  <div class="levers-section">
+    <h3>Growth Lever Impact — Which Move Moves Your Numbers Most</h3>
+    <table class="levers-table" id="leversTable">
+      <thead>
+        <tr>
+          <th>Growth Lever</th>
+          <th>What Changes</th>
+          <th>Revenue Impact (Total Base)</th>
+        </tr>
+      </thead>
+      <tbody id="leversTbody"></tbody>
+    </table>
+  </div>
+
+  <div class="recs-section">
+    <h3>Top 3 Recommendations for Your Business</h3>
+    <div id="recsContainer"></div>
+  </div>
+
+  <div class="bain-stat">
+    <div class="bain-icon">!!!</div>
+    <div class="bain-text">
+      <strong>Bain &amp; Company Research:</strong> Increasing customer retention by just 5% can increase profits by <strong>25-95%</strong>. Your highest-leverage opportunity may already be inside your existing customer base.
+    </div>
+  </div>
+
+  <div class="pdf-row">
+    <button class="btn-pdf" onclick="generatePDF()">Download PDF Report</button>
+    <button class="btn-recalc" onclick="recalculate()">Recalculate</button>
+  </div>
+</div>
+
+<footer>
+  tom@tms-solutions-group.com &nbsp;|&nbsp; <a href="https://tms-solutions-group.com">tms-solutions-group.com</a> &nbsp;|&nbsp; 386-387-8620
+</footer>
+
+<script>
+  // ── GLOBALS ──
+  let results = {};
+
+  function fmt(n) {
+    if (n >= 1000000) return '$' + (n / 1000000).toFixed(2) + 'M';
+    if (n >= 1000) return '$' + Math.round(n).toLocaleString();
+    return '$' + n.toFixed(2);
+  }
+  function fmtRatio(r) {
+    return r.toFixed(2) + ':1';
+  }
+
+  // ── CALCULATE ──
+  function calculate() {
+    const av  = parseFloat(document.getElementById('avgTransaction').value)  || 0;
+    const fr  = parseFloat(document.getElementById('frequency').value)        || 0;
+    const ls  = parseFloat(document.getElementById('lifespan').value)         || 0;
+    const tc  = parseFloat(document.getElementById('totalCustomers').value)   || 0;
+    const pm  = parseFloat(document.getElementById('profitMargin').value)     || 30;
+    const ms  = parseFloat(document.getElementById('marketingSpend').value)   || 0;
+    const nc  = parseFloat(document.getElementById('newCustomers').value)     || 0;
+    const biz = document.getElementById('businessName').value.trim();
+
+    if (!av || !fr || !ls || !tc) {
+      alert('Please fill in Average Transaction Value, Purchases Per Year, Customer Lifespan, and Total Active Customers.');
+      return;
+    }
+
+    const clv         = av * fr * ls;
+    const totalBase   = clv * tc;
+    const profitPerCx = clv * (pm / 100);
+    const cac         = (nc > 0 && ms > 0) ? ms / nc : null;
+    const ratio       = (cac && cac > 0) ? clv / cac : null;
+
+    // levers — total base impact
+    const retentionImpact  = av * fr * 1 * tc;              // 1 extra year
+    const frequencyImpact  = av * 1 * ls * tc;              // 1 more purchase/yr
+    const transactionImpact = (av * 0.10) * fr * ls * tc;   // 10% higher ticket
+
+    const levers = [
+      { id: 'retention',   name: '1 Extra Year of Retention',       desc: '+1 year on average customer lifespan',           impact: retentionImpact },
+      { id: 'frequency',   name: '+1 Purchase Per Year',            desc: 'Increase purchase frequency by one visit/order', impact: frequencyImpact },
+      { id: 'transaction', name: 'Increase Average Sale by 10%',    desc: '10% uplift in average transaction value',        impact: transactionImpact },
+    ];
+
+    const sortedLevers = [...levers].sort((a, b) => b.impact - a.impact);
+    const bestLeverId = sortedLevers[0].id;
+
+    results = { av, fr, ls, tc, pm, ms, nc, biz, clv, totalBase, profitPerCx, cac, ratio, levers, sortedLevers, bestLeverId };
+
+    renderResults();
+  }
+
+  function renderResults() {
+    const r = results;
+
+    // banner
+    const banner = document.getElementById('ratioBanner');
+    const bannerLabel = document.getElementById('bannerLabel');
+    const bannerTitle = document.getElementById('bannerTitle');
+    const bannerDesc  = document.getElementById('bannerDesc');
+    const bannerIcon  = document.getElementById('bannerIcon');
+    banner.className = 'ratio-banner';
+
+    if (r.ratio === null) {
+      banner.classList.add('yellow');
+      bannerLabel.className = 'banner-label yellow';
+      bannerLabel.textContent = 'LTV:CAC — Not Calculated';
+      bannerIcon.textContent = '---';
+      bannerTitle.textContent = 'Enter Marketing Spend + New Customers to unlock your LTV:CAC ratio';
+      bannerDesc.textContent = 'Your CLV and base value are shown below.';
+    } else if (r.ratio >= 3) {
+      banner.classList.add('green');
+      bannerLabel.className = 'banner-label green';
+      bannerLabel.textContent = 'Healthy — LTV:CAC 3:1 or Better';
+      bannerIcon.textContent = '[OK]';
+      bannerTitle.textContent = 'Your customer economics are strong. Focus on scaling acquisition.';
+      bannerDesc.textContent = 'An LTV:CAC of ' + fmtRatio(r.ratio) + ' means every $1 in marketing returns ' + r.ratio.toFixed(1) + 'x in lifetime revenue.';
+    } else if (r.ratio >= 1.5) {
+      banner.classList.add('yellow');
+      bannerLabel.className = 'banner-label yellow';
+      bannerLabel.textContent = 'Caution — LTV:CAC Between 1.5:1 and 3:1';
+      bannerIcon.textContent = '[!!]';
+      bannerTitle.textContent = 'Room for improvement — your margins are thin relative to acquisition cost.';
+      bannerDesc.textContent = 'An LTV:CAC of ' + fmtRatio(r.ratio) + '. Target 3:1 or higher for sustainable growth.';
+    } else {
+      banner.classList.add('red');
+      bannerLabel.className = 'banner-label red';
+      bannerLabel.textContent = 'At Risk — LTV:CAC Below 1.5:1';
+      bannerIcon.textContent = '[!!]';
+      bannerTitle.textContent = 'Your cost to acquire customers exceeds long-term value. Action required.';
+      bannerDesc.textContent = 'An LTV:CAC of ' + fmtRatio(r.ratio) + '. Focus on retention and reducing CAC immediately.';
+    }
+
+    // metrics
+    document.getElementById('mCLV').textContent       = fmt(r.clv);
+    document.getElementById('mTotalBase').textContent  = fmt(r.totalBase);
+    document.getElementById('mRatio').textContent      = r.ratio !== null ? fmtRatio(r.ratio) : 'N/A';
+
+    // summary
+    document.getElementById('sCLV').textContent            = fmt(r.clv);
+    document.getElementById('sTotalBase').textContent       = fmt(r.totalBase);
+    document.getElementById('sProfitPerCustomer').textContent = fmt(r.profitPerCx);
+    document.getElementById('sCAC').textContent             = r.cac !== null ? fmt(r.cac) : 'N/A (add marketing data)';
+    document.getElementById('sRatio').textContent           = r.ratio !== null ? fmtRatio(r.ratio) + ' (healthy benchmark: 3:1+)' : 'N/A';
+
+    // levers table
+    const tbody = document.getElementById('leversTbody');
+    tbody.innerHTML = '';
+    r.levers.forEach(lev => {
+      const isBest = lev.id === r.bestLeverId;
+      const tr = document.createElement('tr');
+      if (isBest) tr.className = 'best-lever';
+      tr.innerHTML = `
+        <td>
+          <div class="lever-name">${lev.name}${isBest ? '<span class="best-badge">Biggest Impact</span>' : ''}</div>
+          <div class="lever-desc">${lev.desc}</div>
+        </td>
+        <td>${lev.id === 'retention' ? 'Lifespan +1 yr' : lev.id === 'frequency' ? 'Frequency +1x/yr' : 'Avg sale +10%'}</td>
+        <td><div class="lever-impact">${fmt(lev.impact)}</div></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // recs
+    const recsMap = {
+      retention: {
+        title: 'Invest in Retention Programs',
+        body: 'Retention is your highest-leverage growth lever. A loyalty program, post-purchase follow-up sequence, or annual service plan could add ' + fmt(r.levers.find(l=>l.id==='retention').impact) + ' in revenue across your customer base with just one extra year of retention per customer.'
+      },
+      frequency: {
+        title: 'Drive Repeat Purchase Frequency',
+        body: 'Getting each customer to buy just one more time per year would add ' + fmt(r.levers.find(l=>l.id==='frequency').impact) + ' to your total base value. Consider email campaigns, seasonal promotions, or subscription-based offers to drive frequency.'
+      },
+      transaction: {
+        title: 'Increase Average Transaction Value',
+        body: 'A 10% increase in your average sale — through upsells, bundles, or tiered pricing — would add ' + fmt(r.levers.find(l=>l.id==='transaction').impact) + ' across your base. This is often the fastest lever to pull with existing customers.'
+      }
+    };
+    const cacRec = {
+      title: 'Reduce Your Customer Acquisition Cost',
+      body: r.cac !== null
+        ? 'Your current CAC is ' + fmt(r.cac) + '. Improving referral programs, organic channels, or conversion rates can lower this and push your LTV:CAC ratio above the 3:1 benchmark.'
+        : 'Track your monthly marketing spend and new customers acquired to calculate your CAC and unlock LTV:CAC benchmarking.'
+    };
+
+    const recList = r.sortedLevers.map(l => recsMap[l.id]);
+    // Replace #3 with CAC rec if ratio is red or null
+    if (!r.ratio || r.ratio < 1.5) recList[2] = cacRec;
+
+    const container = document.getElementById('recsContainer');
+    container.innerHTML = '';
+    recList.forEach((rec, i) => {
+      const div = document.createElement('div');
+      div.className = 'rec-card';
+      div.innerHTML = `<div class="rec-num">${i+1}</div><div><div class="rec-title">${rec.title}</div><div class="rec-body">${rec.body}</div></div>`;
+      container.appendChild(div);
+    });
+
+    document.getElementById('form-section').style.display = 'none';
+    document.getElementById('landing-section').style.display = 'none';
+    document.getElementById('results').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function recalculate() {
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('landing-section').style.display = 'block';
+    document.getElementById('form-section').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── PDF ──
+  function pdfSafe(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/\u2013/g, '-')
+      .replace(/\u2014/g, '-')
+      .replace(/\u00B7/g, '|')
+      .replace(/\u2019/g, "'")
+      .replace(/\u2018/g, "'")
+      .replace(/\u201C/g, '"')
+      .replace(/\u201D/g, '"')
+      .replace(/[^\x00-\x7F]/g, '');
+  }
+
+  function generatePDF() {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+      const r = results;
+
+      const CREAM  = [250, 250, 247];
+      const GOLD   = [184, 134, 11];
+      const DARK   = [26, 26, 26];
+      const WHITE  = [255, 255, 255];
+      const GRAY   = [120, 120, 120];
+      const LGRAY  = [240, 240, 238];
+      const GREEN  = [39, 174, 96];
+      const YELLOW = [230, 126, 34];
+      const RED    = [192, 57, 43];
+      const W = 612;
+      const H = 792;
+
+      const bizName = pdfSafe(r.biz || 'Your Business');
+      const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // ── PAGE 1 — COVER / SUMMARY ──
+      doc.setFillColor(...CREAM);
+      doc.rect(0, 0, W, H, 'F');
+
+      // top bar
+      doc.setFillColor(...DARK);
+      doc.rect(0, 0, W, 70, 'F');
+      doc.setTextColor(...GOLD);
+      doc.setFont('times', 'bold');
+      doc.setFontSize(18);
+      doc.text(pdfSafe('TMS Solutions Group'), 36, 30);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...GRAY);
+      doc.text(pdfSafe('tom@tms-solutions-group.com  |  tms-solutions-group.com  |  386-387-8620'), 36, 48);
+      doc.setTextColor(200, 200, 200);
+      doc.text(pdfSafe(today), W - 36, 48, { align: 'right' });
+
+      // title block
+      doc.setFillColor(...GOLD);
+      doc.rect(0, 70, 6, 160, 'F');
+
+      doc.setFont('times', 'bold');
+      doc.setFontSize(28);
+      doc.setTextColor(...DARK);
+      doc.text(pdfSafe('Customer Lifetime Value'), 36, 120);
+      doc.text(pdfSafe('Calculator Report'), 36, 155);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(13);
+      doc.setTextColor(...GRAY);
+      doc.text(pdfSafe(bizName), 36, 185);
+
+      // ratio badge
+      let ratioColor = YELLOW;
+      let ratioLabel = 'CAUTION';
+      let ratioText = 'LTV:CAC Not Calculated';
+      if (r.ratio !== null) {
+        if (r.ratio >= 3)       { ratioColor = GREEN;  ratioLabel = 'HEALTHY';   ratioText = 'LTV:CAC Ratio: ' + fmtRatio(r.ratio); }
+        else if (r.ratio >= 1.5){ ratioColor = YELLOW; ratioLabel = 'CAUTION';   ratioText = 'LTV:CAC Ratio: ' + fmtRatio(r.ratio); }
+        else                    { ratioColor = RED;    ratioLabel = 'AT RISK';   ratioText = 'LTV:CAC Ratio: ' + fmtRatio(r.ratio); }
+      }
+
+      doc.setFillColor(...ratioColor);
+      doc.roundedRect(36, 215, W - 72, 50, 6, 6, 'F');
+      doc.setTextColor(...WHITE);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.text(pdfSafe(ratioLabel), 58, 236);
+      doc.setFontSize(14);
+      doc.text(pdfSafe(ratioText), 58, 254);
+
+      // 3 metric boxes
+      const boxW = (W - 72 - 24) / 3;
+      const metrics = [
+        { label: 'Customer Lifetime Value', value: fmt(r.clv) },
+        { label: 'Total Customer Base Value', value: fmt(r.totalBase) },
+        { label: 'LTV:CAC Ratio', value: r.ratio !== null ? fmtRatio(r.ratio) : 'N/A' },
+      ];
+      metrics.forEach((m, i) => {
+        const bx = 36 + i * (boxW + 12);
+        const by = 285;
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(bx, by, boxW, 80, 6, 6, 'F');
+        doc.setTextColor(...GOLD);
+        doc.setFont('times', 'bold');
+        doc.setFontSize(20);
+        doc.text(pdfSafe(m.value), bx + boxW / 2, by + 36, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...GRAY);
+        const lines = doc.splitTextToSize(pdfSafe(m.label), boxW - 16);
+        doc.text(lines, bx + boxW / 2, by + 54, { align: 'center' });
+      });
+
+      // summary rows
+      let sy = 395;
+      doc.setFont('times', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...DARK);
+      doc.text(pdfSafe('Business Snapshot'), 36, sy);
+      sy += 16;
+
+      const summaryRows = [
+        ['Customer Lifetime Value (CLV)', fmt(r.clv)],
+        ['Total Customer Base Value', fmt(r.totalBase)],
+        ['Profit Per Customer Lifetime', fmt(r.profitPerCx)],
+        ['Cost to Acquire One Customer (CAC)', r.cac !== null ? fmt(r.cac) : 'N/A'],
+        ['LTV:CAC Ratio', r.ratio !== null ? fmtRatio(r.ratio) + ' (benchmark: 3:1+)' : 'N/A'],
+      ];
+
+      summaryRows.forEach((row, idx) => {
+        const bg = idx % 2 === 0 ? LGRAY : WHITE;
+        doc.setFillColor(...bg);
+        doc.rect(36, sy, W - 72, 22, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK);
+        doc.text(pdfSafe(row[0]), 46, sy + 14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(pdfSafe(row[1]), W - 46, sy + 14, { align: 'right' });
+        sy += 22;
+      });
+
+      // inputs used
+      sy += 20;
+      doc.setFont('times', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...DARK);
+      doc.text(pdfSafe('Inputs Used'), 36, sy);
+      sy += 16;
+
+      const inputRows = [
+        ['Average Transaction Value', fmt(r.av)],
+        ['Purchase Frequency', r.fr + 'x per year'],
+        ['Customer Lifespan', r.ls + ' years'],
+        ['Total Active Customers', Number(r.tc).toLocaleString()],
+        ['Profit Margin', r.pm + '%'],
+        r.ms ? ['Monthly Marketing Spend', fmt(r.ms)] : null,
+        r.nc ? ['New Customers Per Month', r.nc + ' customers'] : null,
+      ].filter(Boolean);
+
+      inputRows.forEach((row, idx) => {
+        const bg = idx % 2 === 0 ? LGRAY : WHITE;
+        doc.setFillColor(...bg);
+        doc.rect(36, sy, W - 72, 20, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor(...GRAY);
+        doc.text(pdfSafe(row[0]), 46, sy + 13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...DARK);
+        doc.text(pdfSafe(row[1]), W - 46, sy + 13, { align: 'right' });
+        sy += 20;
+      });
+
+      // footer p1
+      doc.setFillColor(...DARK);
+      doc.rect(0, H - 36, W, 36, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text(pdfSafe('tom@tms-solutions-group.com  |  tms-solutions-group.com  |  386-387-8620'), W / 2, H - 14, { align: 'center' });
+
+      // ── PAGE 2 — DETAIL ──
+      doc.addPage();
+      doc.setFillColor(...CREAM);
+      doc.rect(0, 0, W, H, 'F');
+
+      // top bar p2
+      doc.setFillColor(...DARK);
+      doc.rect(0, 0, W, 50, 'F');
+      doc.setTextColor(...GOLD);
+      doc.setFont('times', 'bold');
+      doc.setFontSize(14);
+      doc.text(pdfSafe('TMS Solutions Group  |  CLV Calculator Report'), 36, 22);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text(pdfSafe(bizName + '  |  ' + today), 36, 40);
+
+      let py = 78;
+
+      // levers table
+      doc.setFont('times', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(...DARK);
+      doc.text(pdfSafe('Growth Lever Impact Analysis'), 36, py);
+      py += 16;
+
+      // header row
+      doc.setFillColor(...DARK);
+      doc.rect(36, py, W - 72, 24, 'F');
+      doc.setTextColor(...WHITE);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.text(pdfSafe('GROWTH LEVER'), 46, py + 15);
+      doc.text(pdfSafe('WHAT CHANGES'), 260, py + 15);
+      doc.text(pdfSafe('REVENUE IMPACT (TOTAL BASE)'), W - 46, py + 15, { align: 'right' });
+      py += 24;
+
+      r.levers.forEach((lev, idx) => {
+        const isBest = lev.id === r.bestLeverId;
+        const bg = isBest ? [255, 251, 240] : (idx % 2 === 0 ? LGRAY : WHITE);
+        doc.setFillColor(...bg);
+        doc.rect(36, py, W - 72, 36, 'F');
+        if (isBest) {
+          doc.setFillColor(...GOLD);
+          doc.rect(36, py, 4, 36, 'F');
+        }
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...DARK);
+        const leverName = pdfSafe(lev.name) + (isBest ? '  [BIGGEST IMPACT]' : '');
+        doc.text(leverName, 46, py + 14);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...GRAY);
+        doc.text(pdfSafe(lev.desc), 46, py + 26);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(...GOLD);
+        doc.text(pdfSafe(lev.id === 'retention' ? 'Lifespan +1 yr' : lev.id === 'frequency' ? 'Frequency +1x/yr' : 'Avg sale +10%'), 260, py + 20);
+        doc.setFontSize(11);
+        doc.text(pdfSafe(fmt(lev.impact)), W - 46, py + 20, { align: 'right' });
+        py += 36;
+      });
+
+      py += 24;
+
+      // recs
+      doc.setFont('times', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(...DARK);
+      doc.text(pdfSafe('Top 3 Recommendations'), 36, py);
+      py += 16;
+
+      const recsMap2 = {
+        retention: {
+          title: 'Invest in Retention Programs',
+          body: 'Retention is your highest-leverage growth lever. A loyalty program, post-purchase follow-up, or annual service plan could add ' + fmt(r.levers.find(l=>l.id==='retention').impact) + ' with just one extra year of retention per customer.'
+        },
+        frequency: {
+          title: 'Drive Repeat Purchase Frequency',
+          body: 'Getting each customer to buy just one more time per year would add ' + fmt(r.levers.find(l=>l.id==='frequency').impact) + '. Consider email campaigns, seasonal promotions, or subscription-based offers.'
+        },
+        transaction: {
+          title: 'Increase Average Transaction Value',
+          body: 'A 10% increase in your average sale through upsells or bundles would add ' + fmt(r.levers.find(l=>l.id==='transaction').impact) + ' across your base. Often the fastest lever with existing customers.'
+        }
+      };
+      const cacRec2 = {
+        title: 'Reduce Your Customer Acquisition Cost',
+        body: r.cac !== null
+          ? 'Your current CAC is ' + fmt(r.cac) + '. Improving referral programs and organic channels can lower this and push your LTV:CAC ratio above the 3:1 benchmark.'
+          : 'Track monthly marketing spend and new customers to calculate your CAC and unlock LTV:CAC benchmarking.'
+      };
+
+      const pdfRecList = r.sortedLevers.map(l => recsMap2[l.id]);
+      if (!r.ratio || r.ratio < 1.5) pdfRecList[2] = cacRec2;
+
+      pdfRecList.forEach((rec, i) => {
+        doc.setFillColor(...WHITE);
+        doc.roundedRect(36, py, W - 72, 60, 5, 5, 'F');
+        doc.setFillColor(...GOLD);
+        doc.circle(56, py + 22, 10, 'F');
+        doc.setTextColor(...WHITE);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text(String(i + 1), 56, py + 26, { align: 'center' });
+        doc.setTextColor(...DARK);
+        doc.setFontSize(10);
+        doc.text(pdfSafe(rec.title), 74, py + 18);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...GRAY);
+        const bodyLines = doc.splitTextToSize(pdfSafe(rec.body), W - 72 - 46);
+        doc.text(bodyLines, 74, py + 32);
+        py += 68;
+      });
+
+      py += 12;
+
+      // Bain stat box
+      doc.setFillColor(...DARK);
+      doc.roundedRect(36, py, W - 72, 56, 6, 6, 'F');
+      doc.setTextColor(...GOLD);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9);
+      doc.text(pdfSafe('Bain & Company Research Finding:'), 52, py + 16);
+      doc.setTextColor(220, 220, 220);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      const bainLines = doc.splitTextToSize(pdfSafe('Increasing customer retention by just 5% can increase profits by 25-95%. Your highest-leverage opportunity may already be inside your existing customer base.'), W - 72 - 32);
+      doc.text(bainLines, 52, py + 30);
+      py += 68;
+
+      // CTA
+      doc.setFillColor(...GOLD);
+      doc.roundedRect(36, py, W - 72, 56, 6, 6, 'F');
+      doc.setTextColor(...DARK);
+      doc.setFont('times', 'bold');
+      doc.setFontSize(13);
+      doc.text(pdfSafe('Ready to Act on These Numbers?'), W / 2, py + 20, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(pdfSafe('Schedule a free strategy call: tom@tms-solutions-group.com  |  tms-solutions-group.com  |  386-387-8620'), W / 2, py + 38, { align: 'center' });
+
+      // footer p2
+      doc.setFillColor(...DARK);
+      doc.rect(0, H - 36, W, 36, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...GRAY);
+      doc.text(pdfSafe('tom@tms-solutions-group.com  |  tms-solutions-group.com  |  386-387-8620'), W / 2, H - 14, { align: 'center' });
+
+      // save
+      const safeBiz = (r.biz || 'Report').replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      const filename = 'TMS-CLV-Calculator-' + (safeBiz || 'Report') + '.pdf';
+      doc.save(filename);
+
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      alert('PDF generation failed: ' + err.message);
+    }
+  }
+</script>
+</body>
+</html>
